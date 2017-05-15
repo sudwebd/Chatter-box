@@ -1,0 +1,109 @@
+<DOCTYPE= html>
+<html>
+<head>
+  <title>Chatter-box</title>
+  <link rel="stylesheet" href='stylesheets/styles.css'/>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+</head>
+<body>
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js"integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <div class="title">
+    <p class="heading"><strong>Chatter-box</strong></p>
+    <p class="tagline">The real chat app</p>
+    <nav class="navbar">
+      <ul class="nav navbar-nav navbar-left">
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Online Users <span class="caret"></span></a>
+          <ul class="dropdown-menu" id="onlineusers">
+
+          </ul>
+        </li>
+        <li id="current_user">
+          <!--present user appended here-->
+        </li>
+      </ul>
+    </nav>
+
+  </div>
+  <div class="main">
+  <form class="new_client row col-md-offset-2" id="userform">
+    <div class="col-md-5 col-xs-5 ">
+    <input class="form-control"type="text" id="username" placeholder="Enter your name"/></div>
+      <input type="submit" value="Enter chat" class="col-md-3 col-xs-3 btn btn-info">
+      </button>
+  </form>
+</br>
+<div class="section">
+
+<div class="chat-area" id="chat-area">
+</div>
+</br>
+<form class="row" id="msgform">
+  <div class="form-group col-md-8 col-xs-8">
+    <textarea class="form-control" id="msgarea" rows="3" placeholder="Enter your message"></textarea>
+  </div>
+  <div class="send-button">
+  <input class="col-md-2 col-xs-4 btn btn-primary" type="submit" value="Send Message"/>
+</div>
+</form>
+</div>
+
+</div>
+<script>
+$(function(){
+  var socket=io.connect();
+  var $msgform=$('#msgform');
+  var $chat=$('#chat-area');
+  var $msgarea=$('#msgarea');
+  var $userform=$('#userform');
+  var $username=$('#username');
+  var $section=$('.section');
+  var $onlineusers=$('#onlineusers');
+  var $current_user=$('#current_user');
+  var colors=['#1adda4','#1ddced','#e57373','#66bb6a','#4db6ac','#dce77','#9ccc65','#ffd54f','#ffeb3b','#ff7043','#ffccbc','#ffa726','#64ffda','#00e5ff','#ff5252'];
+
+  $msgform.submit(function(e){
+    e.preventDefault();
+    socket.emit('send message',$msgarea.val());
+    $msgarea.val('');
+    });
+    socket.on('new message',function(data){
+      var userindex=data.users.indexOf(data.name);//finding the index of the user
+        userindex=(userindex)%(colors.length);//incase userindex value exceeds are array of colors in size
+      var usercolor=colors[userindex];//assignig different colors to different users
+      var evod=(userindex)%2;
+      if(evod==0){
+      $chat.append('<div class="chat id1"><p class="user-name">'+data.name+':</p><p class="chat-message-right" style="background:'+usercolor+';">'+data.msg+'</p></div></br>');
+      }
+      else{
+      $chat.append('<div class="chat id2 chat-right"><p class="user-name">:'+data.name+'</p><p class="chat-message-left" style="background:'+usercolor+';">'+data.msg+'</p></div></br>');
+      }
+    });
+
+    $userform.submit(function(e){
+      e.preventDefault();
+      var current=$username.val();
+      socket.emit('new user',$username.val(),function(data){
+        if(data){
+          $current_user.append('<a href="#" title="Current user"><strong>'+current+'</strong></a>');
+          $userform.hide();
+          $section.show();
+        }
+      });
+      $username.val('');
+    });
+    socket.on('get users',function(data){//data is the array of online users
+      var abc='';
+      var leng=colors.length;
+      for(i = 0; i<data.length;i++){
+        var list_color=colors[i%leng];
+        abc+='<li class="list-group-item" style="background:'+list_color+'">'+data[i]+'</li>';
+      }
+      $onlineusers.html(abc);
+    });
+});
+</script>
+</body>
+</html>
