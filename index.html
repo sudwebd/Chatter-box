@@ -64,9 +64,21 @@ $(function(){
   var $current_user=$('#current_user');
   var colors=['#1adda4','#1ddced','#e57373','#66bb6a','#4db6ac','#dce77','#9ccc65','#ffd54f','#ffeb3b','#ff7043','#ffccbc','#ffa726','#64ffda','#00e5ff','#ff5252'];
 
+  function escapeHtml(text) {
+  var map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+
+  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+  }
+
   $msgform.submit(function(e){
     e.preventDefault();
-    socket.emit('send message',$msgarea.val());
+    socket.emit('send message',escapeHtml($msgarea.val()));
     $msgarea.val('');
     });
     socket.on('new message',function(data){
