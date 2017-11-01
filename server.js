@@ -7,7 +7,7 @@ var io=require('socket.io').listen(server);
 users =[];
 connections=[];
 server.listen(process.env.PORT || 3000);
-console.log('listning to port ');
+console.log('listning to port 3000');
 app.get('/',function(req,res){
   res.sendFile(__dirname+'/index.html');
 });
