@@ -84,7 +84,7 @@ $(function(){
     });
     socket.on('new message',function(data){
       var userindex=data.users.indexOf(data.name);//finding the index of the user
-        userindex=(userindex)%(colors.length);//incase userindex value exceeds are array of colors in size
+        userindex=(userindex)%(colors.length);//incase userindex value exceeds array of colors in size
       var usercolor=colors[userindex];//assignig different colors to different users
       var evod=(userindex)%2;
       if(evod==0){
